@@ -4,7 +4,7 @@ from torch.nn import Parameter, init
 import torch.nn.functional as F 
 
 spmm = load(name='spmm', sources=['spmm.cpp', 'spmm_kernel.cu'], verbose=True)
-sddmm = load(name='sddmm', sources=['sdmmm.cpp', 'sddmm.cu'], verbose=True)
+sddmm = load(name='sddmm', sources=['sddmm.cpp', 'sddmm.cu'], verbose=True)
 
 class SPMMFunction(torch.autograd.Function):
     @staticmethod
