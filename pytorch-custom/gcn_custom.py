@@ -18,13 +18,33 @@ args = parser.parse_args()
 
 dataset = 'PubMed'
 path = osp.join(osp.dirname(osp.realpath('.')), '..', 'data', dataset)
-dataset = Planetoid(path, dataset, T.NormalizeFeatures())
+# dataset = Planetoid(path, dataset, T.NormalizeFeatures())
+dataset=Planetoid("/home/henrychang/ge-spmm_test/ge-spmm/data/PubMed",dataset,transform=T.NormalizeFeatures())
 data = dataset[0]
 
 import scipy.sparse as scpsp
 import numpy as np
 
 device = torch.device('cuda' )#if torch.cuda.is_available() else 'cpu')
+
+# def proc(add_self_loop=True):
+#     edge_index = data.edge_index.numpy().astype(np.int32)
+#     n_v = data.x.shape[0]
+#     if add_self_loop:
+#         edge_index = np.concatenate((edge_index, np.array([np.arange(n_v).astype(np.int32)]*2)), axis=1) # self-loop
+#     n_e = edge_index.shape[1]
+#     import scipy.sparse as scpsp
+#     adj = scpsp.coo_matrix((np.ones(n_e), (edge_index[0],edge_index[1])), shape=(n_v,n_v))
+
+#     g = {}
+#     adj = adj.tocsr()
+#     g['colptr'] = torch.tensor(adj.indptr).to(device)
+#     g['rowind'] = torch.tensor(adj.indices).to(device)
+#     adj = adj.tocsc()
+#     g['rowptr'] = torch.tensor(adj.indptr).to(device)
+#     g['colind'] = torch.tensor(adj.indices).to(device)
+    
+#     return g 
 
 def proc(add_self_loop=True):
     edge_index = data.edge_index.numpy().astype(np.int32)
@@ -39,9 +59,12 @@ def proc(add_self_loop=True):
     adj = adj.tocsr()
     g['colptr'] = torch.tensor(adj.indptr).to(device)
     g['rowind'] = torch.tensor(adj.indices).to(device)
+    g['value_csc']=torch.tensor(adj.data).to(device).float()
     adj = adj.tocsc()
     g['rowptr'] = torch.tensor(adj.indptr).to(device)
     g['colind'] = torch.tensor(adj.indices).to(device)
+    g['value_csr']=torch.tensor(adj.data).to(device).float()
+    
     
     return g 
 
