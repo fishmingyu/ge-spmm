@@ -9,7 +9,7 @@ sddmm = load(name='sddmm', sources=['sddmm.cpp', 'sddmm.cu'], verbose=True)
 class SPMMFunction(torch.autograd.Function):
     @staticmethod
     def forward(ctx, rowptr, colind, colptr, rowind, feat, edge_weight_csr):
-        out = spmm.csr_spmm(rowptr, colind, feat) #should be (rowptr, colind, edge_weight_csr, grad_out)
+        out = spmm.csr_spmm(rowptr, colind,edge_weight_csr ,feat) #should be (rowptr, colind, edge_weight_csr, grad_out)
         ctx.backward_csc = (rowptr, colind, colptr, rowind, feat, edge_weight_csr)
         return out
     
@@ -94,7 +94,7 @@ class GCNConv(torch.nn.Module):
     def out_deg_sqrt(indptr):
         return (1 / torch.sqrt((indptr[1:]-indptr[:-1]).float())).unsqueeze(dim=1)
 
-    def forward(self, x, rowptr, colind, colptr, rowind):
+    def forward(self, x, rowptr, colind, colptr, rowind,edge_weight_csr):
         """"""
         x = torch.matmul(x, self.weight)
         # if self.cached and self.cached_result is not None:
@@ -126,7 +126,8 @@ class GCNConv(torch.nn.Module):
         in_deg_norm, out_deg_norm = self.cached_result
         if self.normalize:
             x = x*out_deg_norm
-        aggr_out = SPMMFunction.apply(rowptr, colind, colptr, rowind, x)
+        # aggr_out = SPMMFunction.apply(rowptr, colind, colptr, rowind, x)
+        aggr_out = SPMMFunction.apply(rowptr, colind, colptr, rowind, x, edge_weight_csr)
         if self.normalize:
             aggr_out = aggr_out*in_deg_norm
         if self.bias is not None:

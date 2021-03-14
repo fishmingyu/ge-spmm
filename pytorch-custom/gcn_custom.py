@@ -94,10 +94,10 @@ class Net(torch.nn.Module):
         self.non_reg_params = self.conv2.parameters()
 
     def forward(self):
-        x, rowptr, colind, colptr, rowind = data.x, g['rowptr'], g['colind'], g['colptr'], g['rowind']
-        x = F.relu(self.conv1(x, rowptr, colind, colptr, rowind))
+        x, rowptr, colind, colptr, rowind ,edge_weight_csr= data.x, g['rowptr'], g['colind'], g['colptr'], g['rowind'],g['value_csr']
+        x = F.relu(self.conv1(x, rowptr, colind, colptr, rowind,edge_weight_csr))
         x = F.dropout(x, training=self.training)
-        x = self.conv2(x, rowptr, colind, colptr, rowind)
+        x = self.conv2(x, rowptr, colind, colptr, rowind,edge_weight_csr)
         return F.log_softmax(x, dim=1)
         
 
